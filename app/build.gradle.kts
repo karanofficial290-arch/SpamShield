@@ -11,8 +11,8 @@ android {
         applicationId = "com.spamshield"
         minSdk = 29          // Android 10+ (call screening role ke liye zaroori)
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     buildTypes {

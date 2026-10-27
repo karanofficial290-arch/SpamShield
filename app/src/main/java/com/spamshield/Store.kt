@@ -29,6 +29,10 @@ class Store(context: Context) {
         get() = p.getBoolean("allowRepeat", true)
         set(v) = p.edit().putBoolean("allowRepeat", v).apply()
 
+    var cleanCallLog: Boolean
+        get() = p.getBoolean("cleanCallLog", true)
+        set(v) = p.edit().putBoolean("cleanCallLog", v).apply()
+
     // ---- Lists ----
     fun blockList(): List<String> = p.getStringSet("blockList", emptySet())!!.sorted()
     fun allowList(): List<String> = p.getStringSet("allowList", emptySet())!!.sorted()

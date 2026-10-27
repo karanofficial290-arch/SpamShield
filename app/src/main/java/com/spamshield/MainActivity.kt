@@ -43,6 +43,18 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         render()
+        // Agar koi blocked call history me reh gayi ho to app khulte hi saaf kar do
+        if (store.cleanCallLog && CallLogCleaner.hasPermission(this)) {
+            Thread { CallLogCleaner.cleanAll(applicationContext, store.log()) }.start()
+        }
+    }
+
+    private val callLogReq = 3
+
+    private fun requestCallLog() {
+        requestPermissions(
+            arrayOf(Manifest.permission.READ_CALL_LOG, Manifest.permission.WRITE_CALL_LOG), callLogReq
+        )
     }
 
     private fun isShieldOn(): Boolean =
@@ -84,6 +96,24 @@ class MainActivity : Activity() {
             }
             toggle("🔥 SAARE anjaan number block", "Sirf contacts wale hi call kar payenge. Loan app wale roz naye number se call karte hain to yeh ON karo.",
                 store.blockUnknown) { store.blockUnknown = it; render() }
+            toggle("🧹 Call history se bhi delete karo", "Block hui call phone ke dial log / recent calls me bhi nahi dikhegi",
+                store.cleanCallLog) {
+                store.cleanCallLog = it
+                if (it && !CallLogCleaner.hasPermission(this)) requestCallLog()
+                render()
+            }
+            if (store.cleanCallLog && !CallLogCleaner.hasPermission(this)) {
+                label("⚠️ Call history se delete karne ke liye 'Call logs' permission chahiye.", color = red)
+                button("Call log permission do") { requestCallLog() }
+            }
+            if (store.cleanCallLog && CallLogCleaner.hasPermission(this) && store.log().isNotEmpty()) {
+                button("Purani block hui calls bhi history se hatao") {
+                    Thread {
+                        val n = CallLogCleaner.cleanAll(applicationContext, store.log())
+                        runOnUiThread { Toast.makeText(this, "$n call history se hatayi", Toast.LENGTH_SHORT).show() }
+                    }.start()
+                }
+            }
             if (store.blockUnknown) {
                 toggle("Emergency: dobara call aane do", "Koi anjaan number 5 minute me 2 baar call kare to doosri call aa jayegi",
                     store.allowRepeatCaller) { store.allowRepeatCaller = it }
@@ -159,8 +189,14 @@ class MainActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == roleReq && isShieldOn() && !hasContacts()) {
-            requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), contactsReq)
+        if (requestCode == roleReq && isShieldOn()) {
+            val need = mutableListOf<String>()
+            if (!hasContacts()) need += Manifest.permission.READ_CONTACTS
+            if (store.cleanCallLog && !CallLogCleaner.hasPermission(this)) {
+                need += Manifest.permission.READ_CALL_LOG
+                need += Manifest.permission.WRITE_CALL_LOG
+            }
+            if (need.isNotEmpty()) requestPermissions(need.toTypedArray(), contactsReq)
         }
         render()
     }

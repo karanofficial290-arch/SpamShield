@@ -40,6 +40,11 @@ class SpamScreeningService : CallScreeningService() {
                 .build()
 
         respondToCall(details, response)
+
+        // Kuch phone phir bhi call history me "Blocked" entry daal dete hain — usse bhi hatao
+        if (reason != null && Store(this).cleanCallLog) {
+            CallLogCleaner.scheduleDelete(this, number)
+        }
     }
 
     private fun isInContacts(number: String?): Boolean {
