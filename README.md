@@ -28,3 +28,6 @@ Android 10 ya usse naye phone pe chalta hai. Koi internet nahi, koi ads nahi, aa
 4. Jo block karna hai uske switch ON karo.
 
 > Note: Agar Truecaller jaisa koi aur app "Caller ID & spam app" bana hua hai, to ek time pe ek hi chalega. Settings → Apps → Default apps → Caller ID & spam app me Spam Shield chuno.
+
+## ⚖️ Loan Call Legal Assistant
+`loan-assistant/` folder mein AI phone assistant hai jo loan offer aur recovery calls Hindi mein sambhalta hai. Setup: [loan-assistant/README.md](loan-assistant/README.md)
